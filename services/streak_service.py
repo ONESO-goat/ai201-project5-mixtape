@@ -8,8 +8,11 @@ It resets to 1 if a day is skipped.
 
 from datetime import datetime, timezone
 from app import db
+import logging
 from models import User, ListeningEvent
 
+
+logger = logging.Logger(__name__)
 
 def record_listening_event(user_id: str, song_id: str) -> ListeningEvent:
     """
@@ -53,9 +56,11 @@ def update_listening_streak(user: User, now: datetime) -> None:
         user: The User model instance to update.
         now: The current datetime (UTC).
     """
+    print(f"day: {now}")
     today = now.date()
 
     if user.last_listened_at is None:
+        print("DATE IS NONE")
         user.listening_streak = 1
         user.last_listened_at = now
         return
@@ -67,14 +72,22 @@ def update_listening_streak(user: User, now: datetime) -> None:
     last_date = last_listened.date()
     days_since_last = (today - last_date).days
 
+    print(f"Now picking condictional, day since last: {days_since_last}")
     if days_since_last == 0:
         # Already updated today — no change needed
+        print("Already updated today — no change needed")
         return
-    elif days_since_last == 1 and today.weekday() != 6:
+    
+    elif days_since_last == 1: # The error is hitting here. sunday is 6 for weekday() - starts at 0 meaning monday == 0
+        print("days_since_last == 1 and today.weekday() != 6 is True")
         user.listening_streak += 1
     else:
+        print("days_since_last == 1 and today.weekday() != 6 is False") 
         user.listening_streak = 1
-
+    
+    # The error was due to this condictional: and today.weekday() != 6
+    # since sunday was the 6th number in the weekday(), the condictional set it to False 
+    
     user.last_listened_at = now
 
 
@@ -92,3 +105,8 @@ def get_streak(user_id: str) -> int:
     if not user:
         raise ValueError(f"User {user_id} not found")
     return user.listening_streak
+
+
+if __name__ in "__main__":
+    #update_listening_streak()
+    pass

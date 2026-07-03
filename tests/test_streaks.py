@@ -88,9 +88,25 @@ def test_streak_increments_on_sunday(app, user):
         u = db.session.get(User, user.id)
         saturday = datetime(2024, 6, 15, 12, 0, 0, tzinfo=timezone.utc)  # weekday() == 5
         sunday = datetime(2024, 6, 16, 12, 0, 0, tzinfo=timezone.utc)    # weekday() == 6
-
+        
+        # sat = 6/15/2024 12:00
+        # sun = 6/16/2024 12:00
+        # 24 hour difference
+        
+        # NOTE: Adding my own test case here, monday. This is to see what happens when the streaks is sunday -> monday
+        monday = datetime(2024, 6, 17, 12, 0, 0, tzinfo=timezone.utc)    # weekday() == 0
+        
+        
+        
         update_listening_streak(u, saturday)
         assert u.listening_streak == 1
 
-        update_listening_streak(u, sunday)
+        update_listening_streak(u, sunday) # TODO 2: The date 6/16/2024 isnt even taken to full effect in streak_service
         assert u.listening_streak == 2  # Should increment, not reset
+        
+        # if it was monday to sunday, thatll be 6 days. Since it's sunday to monday, it should be 1 day.
+        update_listening_streak(u, monday)
+        assert u.listening_streak == 3 
+
+if __name__ in "__main__":
+    test_streak_increments_on_sunday(app(), user())

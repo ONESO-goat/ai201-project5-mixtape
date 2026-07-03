@@ -63,9 +63,11 @@ def get_playlist_songs(playlist_id: str) -> list[dict]:
         .all()
     )
 
-    return [song.to_dict() for song in songs[:-1]]
-
-
+    return [song.to_dict() for song in songs] 
+    # NOTE Error solved 1: useless slicing, the doc string never mentioned anything about returning 1 song less.
+    # OLD: return [song.to_dict() for song in songs[:-1]] 
+    # FIXED: return [song.to_dict() for song in songs]
+    
 def get_playlist(playlist_id: str) -> dict:
     """
     Get a playlist's metadata (without songs).
