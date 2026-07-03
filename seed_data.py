@@ -187,7 +187,7 @@ def seed():
         print(f"{[f'{song[0].title} id: {song[0].id}' for song in all_songs]}")
         print("\nPLAYLISTS\n")
         print(f"{[f'{playlist.name} id: {playlist.id}' for playlist in playlists]}")
-
+        print(f"NOTI id: {notification.id}")
 if __name__ == "__main__":
     seed()
 

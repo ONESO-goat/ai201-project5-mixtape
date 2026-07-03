@@ -30,6 +30,7 @@ def get_friends_listening_now(user_id: str) -> list[dict]:
         raise ValueError(f"User {user_id} not found")
 
     cutoff = datetime.now(timezone.utc) - RECENT_THRESHOLD
+    print(f"\nRECENT THRESHOLD: {RECENT_THRESHOLD} and CUTOFF: {cutoff}\n")
     friend_ids = [f.id for f in user.friends]
 
     if not friend_ids:
@@ -39,9 +40,9 @@ def get_friends_listening_now(user_id: str) -> list[dict]:
         db.session.query(ListeningEvent)
         .filter(
             ListeningEvent.user_id.in_(friend_ids),
-            ListeningEvent.listened_at >= cutoff,
+            ListeningEvent.listened_at >= cutoff, # date is over the cutoff
         )
-        .order_by(desc(ListeningEvent.listened_at))
+        .order_by(desc(ListeningEvent.listened_at)) # decend
         .all()
     )
 

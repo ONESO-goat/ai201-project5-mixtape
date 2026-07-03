@@ -90,6 +90,57 @@ Friends Listening Now shows people from yesterday
 ```
 
 
+
+SIMONE
+
+```json
+{
+  "count": 2,
+  "feed": [
+    {
+      "friend": {
+        "id": "0f863789-0550-46aa-a7eb-388c0d85b230",
+        "last_listened_at": "2026-07-02T19:27:57.110945", // <-- yesterday
+        "listening_streak": 3,
+        "username": "darius"
+      },
+      "listened_at": "2026-07-03T19:17:57.110945", // <-- Today?
+      "song": {
+        "album": null,
+        "artist": "The Wanderers",
+        "genre": "indie rock",
+        "id": "fc1c5982-0b3e-4662-a900-e6aff09e7716",
+        "share_note": null,
+        "shared_at": "2026-06-28T19:27:57.110945",
+        "shared_by": "ca95b281-51f9-4fd3-8e9e-aabeb8c327b8",
+        "tags": [],
+        "title": "Midnight Drive"
+      }
+    },
+    {
+      "friend": {
+        "id": "ca95b281-51f9-4fd3-8e9e-aabeb8c327b8",
+        "last_listened_at": "2026-07-03T18:27:57.110945",
+        "listening_streak": 7,
+        "username": "nova"
+      },
+      "listened_at": "2026-07-03T17:27:57.110945",
+      "song": {
+        "album": null,
+        "artist": "The Wanderers",
+        "genre": "indie rock",
+        "id": "fc1c5982-0b3e-4662-a900-e6aff09e7716",
+        "share_note": null,
+        "shared_at": "2026-06-28T19:27:57.110945",
+        "shared_by": "ca95b281-51f9-4fd3-8e9e-aabeb8c327b8",
+        "tags": [],
+        "title": "Midnight Drive"
+      }
+    }
+  ]
+}
+```
+
 ## Raw Hypothesis
 
 
@@ -176,6 +227,7 @@ If the tag is also inside the song, it appends it to the list for another time? 
 
 With assistance of **AI (Gemini)**, it helped pointing me to the error and surprisingly my **2nd** theory was in fact True. My issue was that I was manually bashing songs with 0-1 tags, so I just couldn't point exactly where the problem was located. 
 
-A better apporch I shouldve taken was: 
+A better debugging apporch I shouldve taken was: 
+
 1. loop  all song titles into the search_song() (or atleast the first 10-30 to avoid tedious measures or overfilled terminal)
 2. add a condition statment where if the same song appears > 1 times, append the song title to another list (repeated_songs) catching repeated songs.

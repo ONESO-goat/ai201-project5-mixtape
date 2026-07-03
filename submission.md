@@ -173,6 +173,9 @@ or
 seen_song_titles = [] | seen_song_ids = []
 ```
 3. condition where if the current song (id or title, id is better as songs can have same titles) is already inside the seen list, continue
+
+### NOTE
+more information in the curl_results_and_breakdown.md file in the root folder.
 ---
 
 ## Bug 4
@@ -192,7 +195,7 @@ seen_song_titles = [] | seen_song_ids = []
 - darius: 0f863789-0550-46aa-a7eb-388c0d85b230
 - simone: 31942c03-b3ac-45c7-901c-b2b244a0a41d
 - kenji: ce657938-42c3-42aa-8d3e-dfb75c9a1292
-- aaliya id: 676316d3-c641-4477-871d-34b89c9c2ac3
+- aaliya: 676316d3-c641-4477-871d-34b89c9c2ac3
 
 ### songs
 
@@ -215,6 +218,10 @@ seen_song_titles = [] | seen_song_ids = []
 - Late Night Vibes id: 363fc487-fb42-4286-a7ea-ded8095836fa
 - Friday Energy id: 1aa1583e-d58b-40d2-bd51-6371fc6dd89b
 - Study Mode id: 031f6cd6-135c-4246-b03d-ac8426bb1589
+
+### Notifications
+
+b84def72-9505-4faf-a404-c40c3c67d84f
 
 ---
 
@@ -279,8 +286,8 @@ curl http://127.0.0.1:5000/users/ca95b281-51f9-4fd3-8e9e-aabeb8c327b8
 curl http://127.0.0.1:5000/users/ca95b281-51f9-4fd3-8e9e-aabeb8c327b8/streak
 
 # get the notis the user haven't read yet
-curl http://127.0.0.1:5000/users/ca95b281-51f9-4fd3-8e9e-aabeb8c327b8/streak/notifications
+curl http://127.0.0.1:5000/users/ca95b281-51f9-4fd3-8e9e-aabeb8c327b8/notifications
 
 # Mark a noti as "read" when the user clicks on it
-curl http://127.0.0.1:5000/users/notifications/<notification_id>/read
+curl http://127.0.0.1:5000/users/notifications/b84def72-9505-4faf-a404-c40c3c67d84f/read
 ```
