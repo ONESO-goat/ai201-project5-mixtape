@@ -231,3 +231,16 @@ A better debugging apporch I shouldve taken was:
 
 1. loop  all song titles into the search_song() (or atleast the first 10-30 to avoid tedious measures or overfilled terminal)
 2. add a condition statment where if the same song appears > 1 times, append the song title to another list (repeated_songs) catching repeated songs.
+
+---
+
+## command
+
+```bash
+curl -X POST "http://127.0.0.1:5000/songs/fd75296f-41a2-4ee9-9c2e-2f6175b70663/rate" \
+     -H "Content-Type: application/json" \
+     -d '{"user_id": "99156296-5da0-4513-bcb1-f42cd157e130", "score": 3}'
+```
+
+
+## result

@@ -61,7 +61,7 @@ every route delegates **immediately** to a service function. The routes do input
 | 1 | My listening streak keeps resetting | `streak_service.py` | ✅ |
 | 2 | Friends Listening Now shows people from yesterday | `feed_service.py` | ⚠️ |
 | 3 | The same song keeps showing up twice in search | `search_service.py` | ✅ |
-| 4 | I got notified when a friend added my song to a playlist but not when they rated it | `notification_service.py` | ❌ |
+| 4 | I got notified when a friend added my song to a playlist but not when they rated it | `notification_service.py` | ✅ |
 | 5 | The last song in a playlist never shows up | `playlist_service.py` | ✅ |
 
 
@@ -175,12 +175,35 @@ seen_song_titles = [] | seen_song_ids = []
 3. condition where if the current song (id or title, id is better as songs can have same titles) is already inside the seen list, continue
 
 ### NOTE
+
 more information in the curl_results_and_breakdown.md file in the root folder.
+
 ---
 
 ## Bug 4
 
+### Problem
 
+I got notified when a friend added my song to a playlist but not when they rated it
+
+### Issue
+
+```human mistake
+Lets not use the create_notification() function inside the file
+```
+
+### Solution
+
+Simply use the create_notification() we made inside the file
+
+```python
+score = 5
+create_notification(
+        user_id=user_id,
+        notification_type="song_rated",
+        body=f"{rater.username} rated your song '{song.title}' a {score}"
+    )
+```
 
 
 
@@ -189,51 +212,25 @@ more information in the curl_results_and_breakdown.md file in the root folder.
 
 ## IDS
 
-### users
+### Users
 
-- nova: ca95b281-51f9-4fd3-8e9e-aabeb8c327b8
-- darius: 0f863789-0550-46aa-a7eb-388c0d85b230
-- simone: 31942c03-b3ac-45c7-901c-b2b244a0a41d
-- kenji: ce657938-42c3-42aa-8d3e-dfb75c9a1292
-- aaliya: 676316d3-c641-4477-871d-34b89c9c2ac3
+['nova id: 99156296-5da0-4513-bcb1-f42cd157e130', 'darius id: 48e2f298-088d-421e-a601-fcb6a1678af8', 'simone id: cb7a12ec-9c68-4862-84de-f86d7a592cd6', 'kenji id: 2874e214-9d52-429f-b106-47af11017846', 'aaliya id: 316ba8e8-e2d8-4875-b4a6-1c8bceede8ee']
 
-### songs
+### Songs
 
-- Midnight Drive: fc1c5982-0b3e-4662-a900-e6aff09e7716
-- Still Waters: 14b96344-b662-4a72-92ba-2bb35f506262
-- First Light: 9e30a0c3-1087-45c1-8807-59fe8533742b
-- Block Party: f93aac42-9c1a-4d51-940c-b6f3cb7cc879
-- Late Night Session: 541e0949-49ed-4d23-9e6c-c14fed3e9209
-- Golden Hour: 1ba18a56-dc05-4006-8f0e-b3d36131cf04
-- Free Throws: 5fe375fe-8386-4b28-8410-0861e0b213c3
-- Soft Landing: 6eccfb65-24e9-464d-8b11-679f05b25659
-- Crown Heights Anthem: c7462e46-dc5f-419e-b2ad-70abdbb30263
-- Harlem Renaissance: 82257f9f-01d3-434e-8dbc-00e4203aa641
-- After Hours: 724ca4ae-3aa0-4914-9166-2fb252e6c922
-- Lagos to London: a769e642-ac2f-4cae-a806-da63316a8bf9
-- Frequencies: b338fc30-7870-47e8-abb8-5cf0b0ed1952
+['Midnight Drive id: 6dbc2b82-a9bf-4034-bad0-1de85e988578', 'Still Waters id: dec613fa-5ad0-4524-8a7a-858875b42272', 'First Light id: da7f5bf5-f56e-4ed0-af63-9b3f68d565bb', 'Block Party id: 5a7d682a-29b0-40ed-a6f2-6b14ba831a4a', 'Late Night Session id: 90208249-0870-44c6-86f0-7cbe3393f973', 'Golden Hour id: aca77448-fd1e-467f-9b7d-360dfbfdb36f', 'Free Throws id: c4949ee3-51de-4c19-9e7c-0e1dd614719b', 'Soft Landing id: 63721b4a-8c7f-46fa-aba9-e7063a687a0c', 'Crown Heights Anthem id: fd75296f-41a2-4ee9-9c2e-2f6175b70663', 'Harlem Renaissance id: 579d4a06-7e82-492d-b6b5-be5c97dbc817', 'After Hours id: 0c1ea4a6-d9fe-4e66-b8e9-da238e40267c', 'Lagos to London id: 576968ed-2615-4a7a-9367-323c824990c6', 'Frequencies id: e661913b-59f5-4c29-8298-8e749c64f99b']
 
-### playlists
+### Playlists
 
-- Late Night Vibes id: 363fc487-fb42-4286-a7ea-ded8095836fa
-- Friday Energy id: 1aa1583e-d58b-40d2-bd51-6371fc6dd89b
-- Study Mode id: 031f6cd6-135c-4246-b03d-ac8426bb1589
+['Late Night Vibes id: 9544ff59-f976-4436-9d4a-0e402f57d72b', 'Friday Energy id: cd5386f4-4dae-42ed-95d0-dc8181ae61a3', 'Study Mode id: a04852a9-e75d-438c-b9d6-8675b1bc5d82']
 
 ### Notifications
-
-b84def72-9505-4faf-a404-c40c3c67d84f
-
+71daf9bd-b941-4d8d-9064-04f1db633b5c
 ---
 
 # curl commands
 
 **Nova** is our best buddy for this process
-
-ID: ca95b281-51f9-4fd3-8e9e-aabeb8c327b8
-
-**Aaliya** is our second in command
-
-ID: 676316d3-c641-4477-871d-34b89c9c2ac3
 
 ## feed
 

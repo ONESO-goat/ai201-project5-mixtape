@@ -106,7 +106,15 @@ def rate_song(user_id: str, song_id: str, score: int) -> Rating:
         db.session.add(rating)
 
     db.session.commit()
-
+    
+    # NOTE error: inside the function, the system didn't create a notification instance
+    # The solution is to create the noti instance so it appears, 
+    # making sure the user_id is the user who originally shared the song
+    create_notification(
+        user_id=song.shared_by,
+        notification_type="song_rated",
+        body=f"{rater.username} rated your song '{song.title}' a {score}"
+    )
     return rating
 
 
@@ -121,11 +129,15 @@ def get_notifications(user_id: str, unread_only: bool = False) -> list[dict]:
     Returns:
         A list of notification dicts, ordered by most recent first.
     """
+    
+    print(f"USER were getting notis for: {user_id}")
     query = db.session.query(Notification).filter_by(user_id=user_id)
     if unread_only:
         query = query.filter_by(read=False)
     notifications = query.order_by(desc(Notification.created_at)).all()
-    return [n.to_dict() for n in notifications]
+    l = [n.to_dict() for n in notifications]
+    print(l)
+    return l
 
 
 def mark_as_read(notification_id: str) -> None:
