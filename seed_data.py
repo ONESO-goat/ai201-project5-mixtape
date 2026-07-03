@@ -181,7 +181,12 @@ def seed():
         print(f"  Songs: {len(all_songs)}")
         print(f"  Playlists: {len(playlists)}")
         print(f"  Tags: {len(tags)}")
+        print("\nUSERS\n")
         print(f"{[f'{user.username} id: {user.id}' for user in users]}")
+        print("\nSONGS\n")
+        print(f"{[f'{song[0].title} id: {song[0].id}' for song in all_songs]}")
+        print("\nPLAYLISTS\n")
+        print(f"{[f'{playlist.name} id: {playlist.id}' for playlist in playlists]}")
 
 if __name__ == "__main__":
     seed()

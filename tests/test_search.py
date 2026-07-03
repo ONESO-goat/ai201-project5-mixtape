@@ -81,9 +81,10 @@ def seed_songs(app):
 def test_search_returns_matching_songs(app, seed_songs):
     """A basic search returns songs whose title or artist matches the query."""
     with app.app_context():
-        results = search_songs("Borough")
+        results = search_songs("Borough") # TODO 3: the dup error is occuring inside this function from the file search_service
         titles = [r["title"] for r in results]
         assert "Crown Heights Anthem" in titles
+        
 
 
 def test_search_no_duplicates_single_tag_song(app, seed_songs):

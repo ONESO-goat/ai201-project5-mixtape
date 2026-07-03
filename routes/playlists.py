@@ -9,6 +9,17 @@ playlists_bp = Blueprint("playlists", __name__)
 
 @playlists_bp.route("/", methods=["POST"])
 def create():
+    """
+    Creating a playlist
+    takes in:
+    
+    name: str - title of the playlist
+    created_by: str - The username of the user creating the playlist
+    is_collaborative: bool - other users besides the user can edit this playlist
+
+    Returns:
+        the new playlist:dict or an error string
+    """
     data = request.get_json()
     name = data.get("name")
     created_by = data.get("created_by")

@@ -6,8 +6,10 @@ Handles song search logic.
 
 from app import db
 from models import Song, Tag, song_tags
+import logging
+import time
 
-
+logger = logging.Logger(__name__)
 def search_songs(query: str) -> list[dict]:
     """
     Search for songs by title or artist name.
@@ -22,6 +24,9 @@ def search_songs(query: str) -> list[dict]:
         A list of song dicts. Each dict includes all song fields plus a
         'tags' list of tag name strings.
     """
+    
+    print(f"SONG BEING SEARCHED FOR: {query}")
+    
     results = (
         db.session.query(Song)
         .outerjoin(song_tags, Song.id == song_tags.c.song_id)
@@ -33,8 +38,15 @@ def search_songs(query: str) -> list[dict]:
         )
         .all()
     )
+    
+    songs = " ".join(f"\n\t\u2022 {song.to_dict()}" for song in results)
+    print(songs)
+    songs_list = [song.to_dict() for song in results] 
+    titles = [s['title'] for s in songs_list]
+    print(f"song titles: \n\t\u2022{titles}")
 
-    return [song.to_dict() for song in results]
+    # after printing, I dont see dups appearing in searches
+    return songs_list
 
 
 def get_song(song_id: str) -> dict:

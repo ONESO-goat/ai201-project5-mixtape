@@ -46,3 +46,4 @@ def create_app(config=None):
 if __name__ == "__main__":
     app = create_app()
     app.run(debug=True)
+    # FLASK_APP=app:create_app flask run
