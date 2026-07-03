@@ -4,16 +4,22 @@ from flask import Blueprint, request, jsonify
 from services.search_service import search_songs, get_song
 from services.notification_service import rate_song
 from services.streak_service import record_listening_event
-
+import random
 songs_bp = Blueprint("songs", __name__)
 
 
 @songs_bp.route("/search")
-def search():
+def search(manual_search=False):
     query = request.args.get("q", "")
-    if not query:
-        return jsonify({"error": "Query parameter 'q' is required"}), 400
-    results = search_songs(query)
+    
+    if not manual_search and not query:
+        return jsonify({"error": f"Query parameter 'q' is required"}), 400
+    
+    if manual_search:
+        query = random.choice([" Golden Hour", "still water"])
+
+    print(f"SONG BEING SEARCHED FOR BEFORE HITTING search_songs: {query}\n")
+    results = search_songs(query.lower().strip())
     return jsonify({"results": results, "count": len(results)})
 
 

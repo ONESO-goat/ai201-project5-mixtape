@@ -25,7 +25,7 @@ def search_songs(query: str) -> list[dict]:
         'tags' list of tag name strings.
     """
     
-    print(f"SONG BEING SEARCHED FOR: {query}")
+    print(f"SONG BEING SEARCHED FOR INSIDE search_songs: {query}")
     
     results = (
         db.session.query(Song)
@@ -38,15 +38,9 @@ def search_songs(query: str) -> list[dict]:
         )
         .all()
     )
-    
-    songs = " ".join(f"\n\t\u2022 {song.to_dict()}" for song in results)
-    print(songs)
-    songs_list = [song.to_dict() for song in results] 
-    titles = [s['title'] for s in songs_list]
-    print(f"song titles: \n\t\u2022{titles}")
 
-    # after printing, I dont see dups appearing in searches
-    return songs_list
+    song_set ={song.id: song.to_dict() for song in results}
+    return list(song_set.values())
 
 
 def get_song(song_id: str) -> dict:

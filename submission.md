@@ -56,11 +56,11 @@ every route delegates **immediately** to a service function. The routes do input
 * ⚠️ - fix in progress
 * ✅ - fixed
 
-| # | Title | Affected service | status
-|---|-------|-----------------|
+| # | Title | Affected service | Status
+|---|-------|------------------|-------- 
 | 1 | My listening streak keeps resetting | `streak_service.py` | ✅ |
-| 2 | Friends Listening Now shows people from yesterday | `feed_service.py` |
-| 3 | The same song keeps showing up twice in search | `search_service.py` | ⚠️ |
+| 2 | Friends Listening Now shows people from yesterday | `feed_service.py` | ⚠️ |
+| 3 | The same song keeps showing up twice in search | `search_service.py` | ✅ |
 | 4 | I got notified when a friend added my song to a playlist but not when they rated it | `notification_service.py` | ❌ |
 | 5 | The last song in a playlist never shows up | `playlist_service.py` | ✅ |
 
@@ -87,7 +87,10 @@ The function called to list the song, **get_playlist_songs()**, had an unneeded 
 [song_1, song_2, song_3, song_4, song_5].remove(1 songs starting from the end of the list)
 ```
 
-Solution: Simply remove the splice in the returning iteration.
+### Solution: 
+
+Simply remove the splice in the returning iteration.
+
 ---
 
 ## Bug 2
@@ -134,8 +137,42 @@ example:
 
 ### Issue
 
-Haven't found the issue
+```python
+query = "sunflower"
+ results = (
+        db.session.query(Song)
+        .outerjoin(song_tags, Song.id == song_tags.c.song_id) # error is here, songs with many tags dup
+        # appends tags: tag = sunshine; song_title = sunflower
+        # also appends tags: tag = spiderverse; song_title = sunflower
+        # now the song "sunflower" appears twice inside the list
+        .filter(
+            db.or_(
+                Song.title.ilike(f"%{query}%"),
+                Song.artist.ilike(f"%{query}%"),
+            )
+        )
+        .all()
+    )
+```
 
+### Reason
+
+After a bit of trying to find the issue, what is happening is that when a song has plenty of tags, the systems creates the song instance more than once for tags. So when the user queries a song title, if that song instance has more than 1 tag, itll append to the results list.
+
+
+### Solution
+
+* Easily just use the set() function or using {} (curly brackets) instead of [] (square brackets)
+
+or
+
+1. add a loop inside a list of dictionaries of the songs
+2. append the found titles into a list named 
+
+```python
+seen_song_titles = [] | seen_song_ids = []
+```
+3. condition where if the current song (id or title, id is better as songs can have same titles) is already inside the seen list, continue
 ---
 
 ## Bug 4
@@ -194,10 +231,10 @@ ID: 676316d3-c641-4477-871d-34b89c9c2ac3
 ## feed
 
 ```bash
-# listening now
+# friends listening now
 curl http://127.0.0.1:5000/feed/ca95b281-51f9-4fd3-8e9e-aabeb8c327b8/listening-now
 
-# listening activty
+# listening activty of friends
 curl http://127.0.0.1:5000/feed/ca95b281-51f9-4fd3-8e9e-aabeb8c327b8/activity
 ```
 
