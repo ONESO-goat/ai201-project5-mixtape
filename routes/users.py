@@ -36,7 +36,7 @@ def notifications(user_id):
         return jsonify({"error": str(e)}), 404
 
 
-@users_bp.route("/notifications/<notification_id>/read", methods=["POST"])
+@users_bp.route("/<notification_id>/read", methods=["POST"])
 def read_notification(notification_id):
     try:
         mark_as_read(notification_id)

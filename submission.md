@@ -73,8 +73,6 @@ every route delegates **immediately** to a service function. The routes do input
 
 ### Issue
 
-code:
-
 ```python
 assert len(songs) == 5
 ```
@@ -176,7 +174,7 @@ seen_song_titles = [] | seen_song_ids = []
 
 ### NOTE
 
-more information in the curl_results_and_breakdown.md file in the root folder.
+more information during the process solving this bug in the **curl_results_and_breakdown.md** file in the root folder.
 
 ---
 
@@ -184,7 +182,7 @@ more information in the curl_results_and_breakdown.md file in the root folder.
 
 ### Problem
 
-I got notified when a friend added my song to a playlist but not when they rated it
+4. I got notified when a friend added my song to a playlist but not when they rated it
 
 ### Issue
 
@@ -198,18 +196,45 @@ Simply use the create_notification() we made inside the file
 
 ```python
 score = 5
-create_notification(
+noti = create_notification(
         user_id=user_id,
         notification_type="song_rated",
         body=f"{rater.username} rated your song '{song.title}' a {score}"
     )
+print(noti.to_dict())
 ```
 
+result:
+```json - terminal
 
+{
+    "count":1,
+    "notifications":[
 
-
+        {
+            "body":"nova rated your song 'Crown Heights Anthem' a 3",
+            "created_at":"2026-07-04T15:57:01.882286",
+            "id":"0fad7bc9-6d22-450a-b7b4-dee1a7813a01",
+            "read":false,
+            "type":"song_rated",
+            "user_id":"cb7a12ec-9c68-4862-84de-f86d7a592cd6"
+        }
+    ]
+}
+```
 --- 
 
+## Bug 5
+
+
+### Problem
+
+2. Friends Listening Now shows people from yesterday
+
+### Issue
+
+
+---
 ## IDS
 
 ### Users
