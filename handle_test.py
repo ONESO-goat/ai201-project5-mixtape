@@ -73,9 +73,9 @@ test_noti_curls = [
 ]
         
 if __name__ == "__main__":
-    Id = "          cb7a12ec-9c68-4862-84de-f86d7a592cd6         ".strip()
-    subroute = "        notifications        ".strip()
-    route = "        users        ".strip()
+    Id = "          99156296-5da0-4513-bcb1-f42cd157e130         ".strip()
+    route = "        feed        ".strip()
+    subroute = "        listen        ".strip()
     method = "             ".strip()
    
     handle_run_command(route=route, id=Id, subroute=subroute, method=method)

@@ -59,7 +59,7 @@ every route delegates **immediately** to a service function. The routes do input
 | # | Title | Affected service | Status
 |---|-------|------------------|-------- 
 | 1 | My listening streak keeps resetting | `streak_service.py` | ✅ |
-| 2 | Friends Listening Now shows people from yesterday | `feed_service.py` | ⚠️ |
+| 2 | Friends Listening Now shows people from yesterday | `feed_service.py` | ✅ |
 | 3 | The same song keeps showing up twice in search | `search_service.py` | ✅ |
 | 4 | I got notified when a friend added my song to a playlist but not when they rated it | `notification_service.py` | ✅ |
 | 5 | The last song in a playlist never shows up | `playlist_service.py` | ✅ |
@@ -233,8 +233,55 @@ result:
 
 ### Issue
 
+```python
+import datetime
+RECENT_THRESHOLD = timedelta(hours=24)
+```
+
+### Reason
+
+The 24 hour threshold was too wide for a system looking for "most recent" or "friends listening now".
+Originally, I
+
+### Solution
+
+Originally, I believe adding
+
+```python
+ if event.listened_at.day != today.day:
+    If it's not today, skip. The system picks people up from yesterday, ignore.
+    continue
+```
+
+was enough, but if the system is aiming for **most recent**, a song from 1 am is bit too far if the system wants user listening **"now"**
+
+My **final solution** was to just edit the hours on RECENT_THRESHOLD to 1 hour from 24. This apporch is more effective as if we ever need to fix future problems or complaints with **"friends most recent listens"**, we can just edit the hours. **12 hours** can also work if we want a wider range but still falling inside the same day
 
 ---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## IDS
 
 ### Users

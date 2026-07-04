@@ -1,4 +1,6 @@
-# Nova
+
+
+# Debugging process breakdown
 
 ---
 
@@ -146,7 +148,7 @@ SIMONE
 
 ### Theory 1
 
-My theory 1 for why the route is grabbing data from the day before because of **hours**. Instead of the system checking days exactly, it's also depending how many hours past.
+My theory 1 for why the route is grabbing data from the day before because of **hours** (the threshold). Instead of the system checking days exactly, it's also depending how many hours past. This means the original **threshold** is too wide.
 
 example:
 
@@ -155,6 +157,7 @@ example:
 ### Theory 2
 
 My second theory is that the system didn't remove the instance either from splice logic or runtime. It could be the same issue from before where the system is using a unneeded splice.
+
 
 ---
 

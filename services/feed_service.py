@@ -10,7 +10,13 @@ from app import db
 from models import User, Song, ListeningEvent
 
 
-RECENT_THRESHOLD = timedelta(hours=24)
+RECENT_THRESHOLD = timedelta(hours=1)
+# here we are decreasing the threshold from 24 down to 12
+# OLD: RECENT_THRESHOLD = timedelta(hours=24)
+# FIRST: RECENT_THRESHOLD = timedelta(hours=12)
+# FINAL: RECENT_THRESHOLD = timedelta(hours=1)
+# Reason: The threshold might be too wide, if its 24 hours, 
+# itll get data from july 3 12 pm while it's july 4th 12 am
 
 
 def get_friends_listening_now(user_id: str) -> list[dict]:
@@ -25,11 +31,13 @@ def get_friends_listening_now(user_id: str) -> list[dict]:
         A list of dicts, each with 'friend', 'song', and 'listened_at' keys,
         ordered by most recent first.
     """
+    # KEY WORD: LISTENING_NOW -> very recent. Instead of recent, its looking for now
     user = db.session.get(User, user_id)
     if not user:
         raise ValueError(f"User {user_id} not found")
 
-    cutoff = datetime.now(timezone.utc) - RECENT_THRESHOLD
+    today = datetime.now(timezone.utc) # adding today as an editable variable
+    cutoff = today - RECENT_THRESHOLD 
     print(f"\nRECENT THRESHOLD: {RECENT_THRESHOLD} and CUTOFF: {cutoff}\n")
     friend_ids = [f.id for f in user.friends]
 
@@ -50,6 +58,8 @@ def get_friends_listening_now(user_id: str) -> list[dict]:
     seen_friends = set()
     result = []
     for event in recent_events:
+       
+        
         if event.user_id not in seen_friends:
             seen_friends.add(event.user_id)
             friend = db.session.get(User, event.user_id)
