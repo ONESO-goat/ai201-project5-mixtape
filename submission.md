@@ -325,7 +325,7 @@ The duplication only occurs for songs with multiple tags.
 
 ## Fix
 
-Remove duplicate songs before returning results by using a set (tracking seen song IDs).
+Remove duplicate songs before returning results by using a **{curly brace}** set (tracking seen song IDs).
 
 If using a tracker, IDs is safer because multiple songs can share the same title.
 
@@ -455,7 +455,7 @@ to
 1 hour
 ```
 
-This makes "Listening Now" much closer to real time while still allowing some flexibility.
+This makes "Listening Now" much closer to real time activity while still allowing some flexibility.
 
 ---
 
@@ -475,10 +475,12 @@ Another example was asking if my theory for the `listening now shows friends fro
 
 2. I used **ChatGPT** for structuring and polishing the submissions.md.
 
-I used it to:
-* point to what requirements in the rubric were missing or should be improved
-* weak or poor writing, then giving me stronger revised versions
+It aided me by:
+* pointing to what requirements in the rubric were missing or should be improved
+* pointing weak or poor writing, then giving me stronger revised versions
 * tell me what sections were not needed for the file
+
+I used ChatGPT after writing my submission to compare it against the rubric. It pointed out that I was missing navigation strategies, side-effect checks, and reproduction steps. I rewrote those sections myself while keeping my original debugging notes.
 
 
 
@@ -536,4 +538,4 @@ After removing the slice, the test passes and would catch the bug if it were acc
 
 # Conclusion
 
-I haven't had experience debugging code bases, and I believe that’s an important factor to programming so this project was a great entry point. All bugs in this project were simple to fix, but do require depth testing and analysis as some functions or routes don’t expose these bugs openly, example with the 3rd problem **song appearing twice in search**.
+I haven't had experience debugging code bases, and I believe that’s an important factor to programming so this project was a great entry point. All bugs in this project were simple to fix, but required depth analysis on the application structure, and tracing through multiple files. This process was important as some service logic causing the related issues at times don't expose the said problem, example with the 3rd problem **song appearing twice in search**.
