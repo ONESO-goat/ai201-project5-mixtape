@@ -486,7 +486,7 @@ I used it to:
 
 # Commit History
 
-Each bug was committed separately on my `bugfix/mixtape` branch using conventional commit messages.
+Each bug (first two were pushed into 1 commit by accident, but I did provide detail of my changes in the commit message) was committed separately on my `bugfix/mixtape` branch using conventional commit messages.
 
 Example commit messages:
 
@@ -501,6 +501,20 @@ fix: song rating notifications
 
 fix: listening now threshold
 ```
+
+
+---
+
+**note**:
+* playlist missing last song
+
+and
+
+* listening streak resets on sunday
+
+were the bugs I accdentalt pushed into one commit.
+
+---
 
 each with detailed commit messages.
 
