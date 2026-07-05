@@ -503,8 +503,12 @@ fix: listening now threshold
 ```
 
 
----
+each with detailed commit messages.
 
+A screenshot of the commit history is included with my submission.
+
+
+```
 **note**:
 * playlist missing last song
 
@@ -512,13 +516,9 @@ and
 
 * listening streak resets on sunday
 
-were the bugs I accdentalt pushed into one commit.
+were the bugs I accidentally pushed into one commit.
+```
 
----
-
-each with detailed commit messages.
-
-A screenshot of the commit history is included with my submission.
 
 ---
 
