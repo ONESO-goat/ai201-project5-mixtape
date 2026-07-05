@@ -123,6 +123,26 @@ Once I noticed this pattern it became much easier to navigate the codebase becau
 
 ---
 
+# AI Usage
+
+1. I used **Gemini** for the debugging process when stuck.
+
+One example was asking how SQLAlchemy `outerjoin()` works. That explanation helped me understand why songs with multiple tags could appear multiple times. Afterward, I verified the explanation by reading the query myself and confirming that duplicate rows were being returned before the results reached Python.
+
+Another example was asking if my theory for the `listening now shows friends from yesterday` problem was leading to the right direction or there was more to it that I was missing inside the function.
+
+2. I used **ChatGPT** for structuring and polishing the submissions.md.
+
+It aided me by:
+* pointing to what requirements in the rubric were missing or should be improved
+* pointing weak or poor writing, then giving me stronger revised versions
+* tell me what sections were not needed for the file
+
+I used ChatGPT after writing my submission to compare it against the rubric. It pointed out that I was missing navigation strategies, side-effect checks, and reproduction steps. I rewrote those sections myself while keeping my original debugging notes.
+
+
+---
+
 # The Five Open Issues
 * ❌ - not fixed
 * ⚠️ - fix in progress
@@ -462,27 +482,6 @@ This makes "Listening Now" much closer to real time activity while still allowin
 ## Side-Effect Check
 
 I confirmed recent listeners still appeared immediately after listening while users from yesterday no longer appeared.
-
----
-
-# AI Usage
-
-1. I used **Gemini** for the debugging process when stuck.
-
-One example was asking how SQLAlchemy `outerjoin()` works. That explanation helped me understand why songs with multiple tags could appear multiple times. Afterward, I verified the explanation by reading the query myself and confirming that duplicate rows were being returned before the results reached Python.
-
-Another example was asking if my theory for the `listening now shows friends from yesterday` problem was leading to the right direction or there was more to it that I was missing inside the function.
-
-2. I used **ChatGPT** for structuring and polishing the submissions.md.
-
-It aided me by:
-* pointing to what requirements in the rubric were missing or should be improved
-* pointing weak or poor writing, then giving me stronger revised versions
-* tell me what sections were not needed for the file
-
-I used ChatGPT after writing my submission to compare it against the rubric. It pointed out that I was missing navigation strategies, side-effect checks, and reproduction steps. I rewrote those sections myself while keeping my original debugging notes.
-
-
 
 ---
 
