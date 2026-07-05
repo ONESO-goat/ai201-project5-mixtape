@@ -1,57 +1,129 @@
 
+---
 
-# Mixtape
+# Mixtape - submissions.md
 
 ---
 
-# overview
+# Overview
 
-This project, unlike the previous weeks we are **reading** and **editing** an existing codebase for a social web application where users share and rate music. For each error along the way, it's expected that **me**, the editor, point out; bugs, what they caused, and implement the possible solution.
+Unlike previous weeks, this assignment wasn't about writing an application from scratch. Instead, the goal was to read an already existing Flask codebase, understand how different files communicate with each other, locate bugs, explain their root causes, and implement fixes.
+
+Rather than immediately changing code, I first tried to understand how requests flowed through the application. Whenever I fixed a bug, I documented:
+
+* how I reproduced it
+* how I navigated through the codebase
+* the exact root cause
+* why the fix works
+* what I tested afterwards to make sure nothing else broke
 
 ---
-
 
 # Codebase Map
 
-**models.py** defines 5 SQLAlchemy models: 
+The application is organized around Flask routes, SQLAlchemy models, and service files.
 
-- User
-- Song
-- Playlist
-- PlaylistSong
-- Notification
+## Main Files
 
-The PlaylistSong table is a join table that adds an order column — songs in a playlist have an explicit position, not just insertion order.
+### models.py
 
-## Data flow
+Defines all database models used throughout the application.
 
-**user** rates a song: 
+Models include:
 
-```terminal
+* User
+* Song
+* Playlist
+* PlaylistSong
+* Notification
+
+---
+
+### routes/
+
+The route files receive HTTP requests.
+
+Examples:
+
+```
 POST /songs/<id>/rate
+GET /search
+GET /playlist/<id>
 ```
 
-routes/songs.py calls 
+Routes mainly validate input before delegating almost everything to a service function.
 
-```python
+---
+
+### services/
+
+Most of the application's business logic lives here.
+
+Some important services were:
+
+* notification_service.py
+* playlist_service.py
+* search_service.py
+* streak_service.py
+* feed_service.py
+
+Instead of placing application logic inside Flask routes, the routes call service functions that perform database queries and create or update objects.
+
+---
+
+## Data Flow Example
+
+One feature I followed was rating a song.
+
+```
+User submits rating
+
+↓
+
+POST /songs/<id>/rate
+
+↓
+
+routes/songs.py
+
+↓
+
 notification_service.notify_song_rated()
+
+↓
+
+create_notification()
+
+↓
+
+Notification saved to database
+
+↓
+
+Notification appears in user's notification feed
 ```
 
-The function creates a **Notification record** for the song's original sharer. There's no separate rating model — the rating is stored directly on the Song.
-
-### Pattern I noticed: 
-
-every route delegates **immediately** to a service function. The routes do input parsing and response formatting; **all business logic lives in services/**.
-
+This helped me understand that the route itself wasn't responsible for creating notifications. It only forwarded the request to the service layer.
 
 ---
 
-# Bug fixes In The Order I fixed them
+## Architecture Pattern I Noticed
+
+Almost every route immediately delegates work to a service function.
+
+Routes mainly:
+
+* receive requests
+* validate input
+* return JSON responses
+
+while the service files contain nearly all of the business logic.
+
+Once I noticed this pattern it became much easier to navigate the codebase because every route eventually pointed toward the file that actually contained the bug.
 
 ---
 
-## The Five Open Issues
-
+# The Five Open Issues
 * ❌ - not fixed
 * ⚠️ - fix in progress
 * ✅ - fixed
@@ -65,298 +137,389 @@ every route delegates **immediately** to a service function. The routes do input
 | 5 | The last song in a playlist never shows up | `playlist_service.py` | ✅ |
 
 
-## Bug 1
+---
 
-### Problem 
+# Bug 1 — Playlist Missing Last Song
 
-5. The last song in a playlist never shows up
+## Reproduction
 
-### Issue
+Open a playlist containing five songs.
 
-```python
-assert len(songs) == 5
-```
-
-### Reason
-
-The function called to list the song, **get_playlist_songs()**, had an unneeded splice inside the returning comprehension. songs[:-1] was basically telling the system;
-
-```python
-[song_1, song_2, song_3, song_4, song_5].remove(1 songs starting from the end of the list)
-```
-
-### Solution: 
-
-Simply remove the splice in the returning iteration.
+Only four songs appear even though the playlist contains five entries.
 
 ---
 
-## Bug 2
+## Navigation Strategy
 
-### Problem 
+I first looked inside the playlist routes before following the function call into `playlist_service.py`.
 
-1. My listening streak keeps resetting
+Since the bug only affected displaying playlist contents, I focused on the function responsible for returning playlist songs.
 
-### Issue
+Once I found `get_playlist_songs()`, I noticed the returned list was being sliced.
 
-```python
-update_listening_streak(u, sunday)
-```
-
-### Reason
-
-The error was due to this conditional: 
-
-```python
-# else if 1 day has passed from the previous streal and today's weekday is sunday
-elif days_since_last == 1 and today.weekday() != 6:
-    ...
-```
-
-since sunday was the 6th number in the datetime.weekday() function, the condictional was set to **False**.
-
-### Solution
-
-**Remove** the "and today.weekday() != 6" check as it was just straight up useless as the built in python package **datetime** already handles majority of tedious date logic.
-
-example:
-
-- weather it's **monday -> sunday** which means 6 days has passed in terms of the weekday
-
-- weather it's **sunday -> monday** which means 1 day has passed in terms of the weekday
+That immediately matched the symptom.
 
 ---
 
-## Bug 3
+## Root Cause
 
-### Problem
-
-3. The same song keeps showing up twice in search
-
-### Issue
+The function returned:
 
 ```python
-query = "sunflower"
- results = (
-        db.session.query(Song)
-        .outerjoin(song_tags, Song.id == song_tags.c.song_id) # error is here, songs with many tags dup
-        # appends tags: tag = sunshine; song_title = sunflower
-        # also appends tags: tag = spiderverse; song_title = sunflower
-        # now the song "sunflower" appears twice inside the list
-        .filter(
-            db.or_(
-                Song.title.ilike(f"%{query}%"),
-                Song.artist.ilike(f"%{query}%"),
-            )
-        )
-        .all()
-    )
+songs[:-1]
 ```
 
-### Reason
+The slice removes the final element from every list.
 
-After a bit of trying to find the issue, what is happening is that when a song has plenty of tags, the systems creates the song instance more than once for tags. So when the user queries a song title, if that song instance has more than 1 tag, itll append to the results list.
+So a playlist like
 
-
-### Solution
-
-* Easily just use the set() function or using {} (curly brackets) instead of [] (square brackets)
-
-or
-
-1. add a loop inside a list of dictionaries of the songs
-2. append the found titles into a list named 
-
-```python
-seen_song_titles = [] | seen_song_ids = []
 ```
-3. condition where if the current song (id or title, id is better as songs can have same titles) is already inside the seen list, continue
+1
+2
+3
+4
+5
+```
 
-### NOTE
+became
 
-more information during the process solving this bug in the **curl_results_and_breakdown.md** file in the root folder.
+```
+1
+2
+3
+4
+```
+
+regardless of playlist size.
 
 ---
 
-## Bug 4
+## Fix
 
-### Problem
-
-4. I got notified when a friend added my song to a playlist but not when they rated it
-
-### Issue
-
-```human mistake
-Lets not use the create_notification() function inside the file
-```
-
-### Solution
-
-Simply use the create_notification() we made inside the file
-
-```python
-score = 5
-noti = create_notification(
-        user_id=user_id,
-        notification_type="song_rated",
-        body=f"{rater.username} rated your song '{song.title}' a {score}"
-    )
-print(noti.to_dict())
-```
-
-result:
-```json - terminal
-
-{
-    "count":1,
-    "notifications":[
-
-        {
-            "body":"nova rated your song 'Crown Heights Anthem' a 3",
-            "created_at":"2026-07-04T15:57:01.882286",
-            "id":"0fad7bc9-6d22-450a-b7b4-dee1a7813a01",
-            "read":false,
-            "type":"song_rated",
-            "user_id":"cb7a12ec-9c68-4862-84de-f86d7a592cd6"
-        }
-    ]
-}
-```
---- 
-
-## Bug 5
-
-
-### Problem
-
-2. Friends Listening Now shows people from yesterday
-
-### Issue
-
-```python
-import datetime
-RECENT_THRESHOLD = timedelta(hours=24)
-```
-
-### Reason
-
-The 24 hour threshold was too wide for a system looking for "most recent" or "friends listening now".
-Originally, I
-
-### Solution
-
-Originally, I believe adding
-
-```python
- if event.listened_at.day != today.day:
-    If it's not today, skip. The system picks people up from yesterday, ignore.
-    continue
-```
-
-was enough, but if the system is aiming for **most recent**, a song from 1 am is bit too far if the system wants user listening **"now"**
-
-My **final solution** was to just edit the hours on RECENT_THRESHOLD to 1 hour from 24. This apporch is more effective as if we ever need to fix future problems or complaints with **"friends most recent listens"**, we can just edit the hours. **12 hours** can also work if we want a wider range but still falling inside the same day
+Removed the unnecessary slice so every song is returned.
 
 ---
 
+## Side-Effect Check
 
+I reopened playlists containing different numbers of songs.
 
+Playlists with one song, several songs, and five songs all displayed correctly, confirming the fix didn't duplicate or reorder songs.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## IDS
-
-### Users
-
-['nova id: 99156296-5da0-4513-bcb1-f42cd157e130', 'darius id: 48e2f298-088d-421e-a601-fcb6a1678af8', 'simone id: cb7a12ec-9c68-4862-84de-f86d7a592cd6', 'kenji id: 2874e214-9d52-429f-b106-47af11017846', 'aaliya id: 316ba8e8-e2d8-4875-b4a6-1c8bceede8ee']
-
-### Songs
-
-['Midnight Drive id: 6dbc2b82-a9bf-4034-bad0-1de85e988578', 'Still Waters id: dec613fa-5ad0-4524-8a7a-858875b42272', 'First Light id: da7f5bf5-f56e-4ed0-af63-9b3f68d565bb', 'Block Party id: 5a7d682a-29b0-40ed-a6f2-6b14ba831a4a', 'Late Night Session id: 90208249-0870-44c6-86f0-7cbe3393f973', 'Golden Hour id: aca77448-fd1e-467f-9b7d-360dfbfdb36f', 'Free Throws id: c4949ee3-51de-4c19-9e7c-0e1dd614719b', 'Soft Landing id: 63721b4a-8c7f-46fa-aba9-e7063a687a0c', 'Crown Heights Anthem id: fd75296f-41a2-4ee9-9c2e-2f6175b70663', 'Harlem Renaissance id: 579d4a06-7e82-492d-b6b5-be5c97dbc817', 'After Hours id: 0c1ea4a6-d9fe-4e66-b8e9-da238e40267c', 'Lagos to London id: 576968ed-2615-4a7a-9367-323c824990c6', 'Frequencies id: e661913b-59f5-4c29-8298-8e749c64f99b']
-
-### Playlists
-
-['Late Night Vibes id: 9544ff59-f976-4436-9d4a-0e402f57d72b', 'Friday Energy id: cd5386f4-4dae-42ed-95d0-dc8181ae61a3', 'Study Mode id: a04852a9-e75d-438c-b9d6-8675b1bc5d82']
-
-### Notifications
-71daf9bd-b941-4d8d-9064-04f1db633b5c
 ---
 
-# curl commands
+# Bug 2 — Listening Streak Resetting
 
-**Nova** is our best buddy for this process
+## Reproduction
 
-## feed
+Use the application across a Saturday → Sunday transition.
 
-```bash
-# friends listening now
-curl http://127.0.0.1:5000/feed/ca95b281-51f9-4fd3-8e9e-aabeb8c327b8/listening-now
+Instead of increasing the streak, it resets.
 
-# listening activty of friends
-curl http://127.0.0.1:5000/feed/ca95b281-51f9-4fd3-8e9e-aabeb8c327b8/activity
+---
+
+## Navigation Strategy
+
+I searched for where listening streaks were updated.
+
+The route eventually called
+
+```python
+update_listening_streak()
 ```
 
-## playlists
+inside `streak_service.py`.
 
-```bash
-# create a playlist
-curl http://127.0.0.1:5000/playlists/
+I stepped through each conditional until I reached the Sunday check.
 
-# get the details from a playlist
-curl http://127.0.0.1:5000/playlists/7389214a-f7b3-44a7-88c4-a915c44e1301
+---
 
-# get songs inside the playlist
-curl http://127.0.0.1:5000/playlists/7389214a-f7b3-44a7-88c4-a915c44e1301/songs
+## Root Cause
+
+The function contained:
+
+```python
+elif days_since_last == 1 and today.weekday() != 6
 ```
 
+Python's `weekday()` uses
 
-## songs
+```
+Monday = 0
 
-```bash
-# search for a song by title
-curl http://127.0.0.1:5000/songs/search
-
-# get the details from a song
-curl http://127.0.0.1:5000/songs/fc1c5982-0b3e-4662-a900-e6aff09e7716
-
-# rate a song with a score between 1-5 (lowest-highest)
-curl http://127.0.0.1:5000/songs/fc1c5982-0b3e-4662-a900-e6aff09e7716/rate
-
-# Mark a song to "listen" when the user starts to listen
-curl http://127.0.0.1:5000/songs/fc1c5982-0b3e-4662-a900-e6aff09e7716/listen
+Sunday = 6
 ```
 
+So even when only one day had passed, Sundays failed the condition.
 
-## users
+That caused the streak update to skip.
 
-```bash
-# get data for a data
-curl http://127.0.0.1:5000/users/ca95b281-51f9-4fd3-8e9e-aabeb8c327b8
+---
 
-# get the user's streak
-curl http://127.0.0.1:5000/users/ca95b281-51f9-4fd3-8e9e-aabeb8c327b8/streak
+## Fix
 
-# get the notis the user haven't read yet
-curl http://127.0.0.1:5000/users/ca95b281-51f9-4fd3-8e9e-aabeb8c327b8/notifications
+Removed
 
-# Mark a noti as "read" when the user clicks on it
-curl http://127.0.0.1:5000/users/notifications/b84def72-9505-4faf-a404-c40c3c67d84f/read
+```python
+today.weekday() != 6
 ```
+
+because `days_since_last` already verifies whether exactly one day passed.
+
+The extra weekday comparison was unnecessary.
+
+---
+
+## Side-Effect Check
+
+I tested weekday transitions including
+
+* Saturday → Sunday
+* Sunday → Monday
+
+The streak increased correctly for every consecutive day.
+
+---
+
+# Bug 3 — Duplicate Search Results
+
+## Reproduction
+
+Search for a song that contains multiple tags.
+
+The same song appears more than once in search results.
+
+---
+
+## Navigation Strategy
+
+I started inside the search route before following the database query into `search_service.py`.
+
+The SQL query performs an outer join against the tag table.
+
+Once I realized each matching tag produced another database row, I became confident the duplication wasn't happening after the query—it was happening during the query itself.
+
+---
+
+## Root Cause
+
+The query joins songs with tags.
+
+If one song has multiple matching tags, SQL returns multiple rows for the same song.
+
+Example:
+
+```
+Sunflower
+tag: sunshine
+
+Sunflower
+tag: spiderverse
+```
+
+Both rows represent the same song, but SQLAlchemy returns both objects.
+
+The duplication only occurs for songs with multiple tags.
+
+---
+
+## Fix
+
+Remove duplicate songs before returning results by using a set (tracking seen song IDs).
+
+If using a tracker, IDs is safer because multiple songs can share the same title.
+
+---
+
+## Side-Effect Check
+
+I searched for:
+
+* songs with one tag
+* songs with many tags
+* songs with no tags
+
+Results still returned correctly while duplicates disappeared.
+
+---
+
+# Bug 4 — Missing Rating Notifications
+
+## Reproduction
+
+Rate another user's song.
+
+The song owner never receives a rating notification.
+
+---
+
+## Navigation Strategy
+
+Since playlist notifications worked correctly, I compared both notification paths.
+
+Eventually I noticed playlist additions used `create_notification()`, while song ratings didn't use it at all.
+
+That inconsistency led me to the bug.
+
+---
+
+## Root Cause
+
+The existing helper function
+
+```python
+create_notification()
+```
+
+wasn't being used.
+
+Instead, notification creation was bypassed.
+
+Because the helper centralizes notification creation, skipping it prevented rating notifications from being generated correctly.
+
+---
+
+## Fix
+
+Use
+
+```python
+create_notification()
+```
+
+when a song receives a rating.
+
+After doing so, rating notifications appeared correctly.
+
+---
+
+## Side-Effect Check
+
+I verified playlist notifications still worked normally and confirmed both notification types appeared in the notification feed.
+
+---
+
+# Bug 5 — Friends Listening Now
+
+## Reproduction
+
+Leave the application overnight.
+
+The next day, "Friends Listening Now" still displays users who last listened yesterday.
+
+---
+
+## Navigation Strategy
+
+The bug description suggested a time comparison.
+
+I searched for constants related to timestamps and eventually found
+
+```python
+RECENT_THRESHOLD
+```
+
+inside `feed_service.py`.
+
+Seeing it set to 24 hours explained why yesterday's activity still qualified.
+
+---
+
+## Root Cause
+
+The application considered anything within the last 24 hours as "listening now."
+
+Technically that includes yesterday.
+
+The bug wasn't the comparison itself—it was that the threshold was too large for the feature's intended behavior.
+
+---
+
+## Fix
+
+Reduced
+
+```python
+RECENT_THRESHOLD
+```
+
+from
+
+```python
+24 hours
+```
+
+to
+
+```python
+1 hour
+```
+
+This makes "Listening Now" much closer to real time while still allowing some flexibility.
+
+---
+
+## Side-Effect Check
+
+I confirmed recent listeners still appeared immediately after listening while users from yesterday no longer appeared.
+
+---
+
+# AI Usage
+
+1. I used **Gemini** for the debugging process when stuck.
+
+One example was asking how SQLAlchemy `outerjoin()` works. That explanation helped me understand why songs with multiple tags could appear multiple times. Afterward, I verified the explanation by reading the query myself and confirming that duplicate rows were being returned before the results reached Python.
+
+Another example was asking if my theory for the `listening now shows friends from yesterday` problem was leading to the right direction or there was more to it that I was missing inside the function.
+
+2. I used **ChatGPT** for structuring and polishing the submissions.md.
+
+I used it to:
+* point to what requirements in the rubric were missing or should be improved
+* weak or poor writing, then giving me stronger revised versions
+* tell me what sections were not needed for the file
+
+
+
+---
+
+# Commit History
+
+Each bug was committed separately on my `bugfix/mixtape` branch using conventional commit messages.
+
+Example commit messages:
+
+```
+fix: playlist missing last song
+
+fix: listening streak resets on sunday
+
+fix: duplicate search results
+
+fix: song rating notifications
+
+fix: listening now threshold
+```
+
+each with detailed commit messages.
+
+A screenshot of the commit history is included with my submission.
+
+---
+
+# Regression Test
+
+I added a regression test for the playlist bug.
+
+The test creates a playlist with multiple songs and verifies that every song is returned.
+
+Before the fix, the test failed because the final song was always omitted due to the list slice.
+
+After removing the slice, the test passes and would catch the bug if it were accidentally reintroduced.
+
+---
+
+# Conclusion
+
+I haven't had experience debugging code bases, and I believe that’s an important factor to programming so this project was a great entry point. All bugs in this project were simple to fix, but do require depth testing and analysis as some functions or routes don’t expose these bugs openly, example with the 3rd problem **song appearing twice in search**.
